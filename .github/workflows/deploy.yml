@@ -1,16 +1,12 @@
 # .github/workflows/deploy.yml
 #
-# INTERIM STATE — publishes public/ directly, with no build step, so the
-# wireframes are live before the app exists. The README already links to
-# /tickrlab/wireframes/ and a dead link on a portfolio project is worse
-# than a missing one.
+# Builds the Vite app and publishes dist/ to GitHub Pages. Tests and typecheck
+# gate the deploy — a dashboard that renders a wrong number confidently is
+# worse than one that fails to ship.
 #
-# WHEN THE VITE APP LANDS, change two things:
-#   1. Add the setup-node / npm ci / npm run build steps below.
-#   2. Change upload path from ./public to ./dist.
-# The published URL for the wireframes does not change either way, because
-# Vite copies public/ into dist/ verbatim. That is why they live in public/
-# rather than docs/.
+# Vite copies public/ into dist/ verbatim, so the wireframes stay served at
+# /tickrlab/wireframes/ — the same URL they had before the app existed. That is
+# why they live in public/ rather than docs/.
 
 name: Deploy Pages
 
@@ -39,19 +35,30 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # --- once the app exists, uncomment: ---
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 20
-      #     cache: 'npm'
-      # - run: npm ci
-      # - run: npm run build      # vite build -> dist/ (copies public/ in)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Gate the deploy on the suite. A dashboard that renders a wrong number
+      # confidently is worse than one that fails to deploy, and the indicator
+      # tests are the only thing standing between those two outcomes.
+      - run: npm test
+
+      - run: npm run typecheck
+
+      # vite build -> dist/, copying public/ in verbatim. That is why the
+      # wireframes live in public/: they land at /tickrlab/wireframes/ with no
+      # extra config and the URL never moved when the app was added.
+      - run: npm run build
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public          # -> ./dist once the build step is enabled
+          path: ./dist
 
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -84,9 +84,21 @@ Two data paths, chosen by how fast the asset actually moves:
 
 | Path | Assets | Transport | Freshness |
 |---|---|---|---|
-| Live | Crypto majors | Binance/Coinbase WebSocket, keyless | True real-time |
+| Live | Crypto majors | Binance WebSocket, keyless | True real-time |
 | Batch | Equities, ETFs, bond & commodity proxies | Static JSON from CI | End of day |
 | Batch | News, SEC filings | Static JSON from CI | ~30–45 min |
+
+**Every source is keyless.** Prices come from Stooq (primary) with Yahoo Finance as
+fallback; news from Yahoo RSS and SEC EDGAR. There is no provider account, no repo
+secret, and no quota — `npm run fetch:prices` runs on a fresh clone with nothing
+configured. That was a deliberate constraint: a pipeline that requires a signup is one
+a reviewer will not run.
+
+The tradeoff is that neither price source is an official, supported API. Stooq answers
+a bad symbol with HTTP 200 and the body `No data`; Yahoo's chart endpoint is
+undocumented and returns 403 without a browser User-Agent. Both failure modes are
+handled explicitly and tested, and the payload records which provider served each
+symbol so a silent drift from primary to fallback is visible rather than invisible.
 
 The UI renders `generatedAt` from the payload rather than claiming "live". Labelling
 end-of-day data as real-time would be the easiest lie in the project and the one most
@@ -220,6 +232,47 @@ mechanical indicator.
 `technicalindicators` from npm would cover most of this. These are implemented directly
 instead: it is about 120 lines, removes a thinly-maintained dependency, and makes the
 unit tests meaningful rather than a test of someone else's library.
+
+### What the score actually does, measured
+
+The theoretical range is [-100, 100]. The observed range is much narrower.
+Across 5,100 scored bars of synthetic series:
+
+|                | p5    | p25   | p50  | p75  | p95  | ≥35  | ≥50  |
+|----------------|-------|-------|------|------|------|------|------|
+| random walk    | −23.0 | −9.7  | 0.1  | 9.5  | 23.3 | 0.6% | 0.0% |
+| mild uptrend   | −19.6 | −9.1  | −1.1 | 8.4  | 24.0 | 0.7% | 0.0% |
+| strong uptrend | −22.1 | −14.0 | −8.1 | −2.1 | 7.7  | 0.1% | 0.0% |
+
+Two things fall out of this, and neither was predicted from the design.
+
+**The composite is heavily damped**, because RSI (read as mean-reversion) and EMA
+spread (trend-following) are structurally opposed. They cancel except on genuine
+confluence — oversold *within* an uptrend, or overbought within a downtrend. That is
+the behaviour the design intends, but it means `|total|` lives in roughly ±25 rather
+than ±100.
+
+**The score reads mildly negative during a strong uptrend** (third row, median −8.1),
+because the mean-reversion term outweighs the trend term at a 0.40/0.30 weighting. This
+is a property of the configuration rather than a bug, and it is precisely the kind of
+thing the validation tab exists to surface.
+
+The practical consequence: the first version of the backtester paired this score with a
+signal threshold of 50, which selected approximately nothing. Every run returned zero
+trades and a 0% hit rate — and a 0% hit rate reads like a finding rather than a
+misconfiguration. The threshold is now 25.
+
+### A bug the tests caught
+
+`rsi()` returned **100 for a perfectly flat series**. The zero-division guard was
+`loss === 0 ? 100 : ...`, which sends zero-gain-zero-loss down the same branch as
+zero-loss-large-gain. An unmoved asset therefore read as maximally overbought and
+scored −40.
+
+The relevant detail is *how* it was caught: by a hand-computed fixture asserting that a
+constant series returns the midpoint. A test written against another indicator library
+would very likely have agreed with the bug, because the same guard appears in several of
+them. This is the concrete argument for the hand-written implementation.
 
 ---
 

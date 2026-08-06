@@ -44,18 +44,37 @@ Both are covered properly in [DESIGN.md](DESIGN.md).
 
 ## Status
 
-Early. The pipeline and the docs came first, deliberately — the scoring engine is
-the substance and it's being built against a real data feed rather than mocks.
-
 | | |
 |---|---|
-| Design doc | ✅ |
-| Wireframes | ✅ |
-| CI data pipeline + keepalive | ✅ workflows in, scripts in progress |
-| Scoring engine + tests | 🔨 |
-| Backtester (Web Worker) | 🔨 |
-| Dashboard UI | ⬜ |
-| Copilot + Worker | ⬜ |
+| Design doc + wireframes | ✅ |
+| CI data pipeline + keepalive | ✅ keyless — no API account required |
+| Scoring engine + tests | ✅ 145 tests |
+| Backtester (Web Worker) | ✅ |
+| Dashboard UI | ✅ |
+| Crypto WebSocket | ✅ |
+| Copilot — classifier + context | ✅ tested, incl. jailbreak cases |
+| Copilot — live inference | ⬜ needs a Cloudflare Worker deploy |
+
+**No API key is needed to run this.** Both price providers (Stooq primary,
+Yahoo fallback) and both news sources (Yahoo RSS, SEC EDGAR) are keyless, so
+`npm run fetch:prices` works on a fresh clone with nothing configured.
+
+### Two things the tests caught
+
+Worth recording, because both were silent failures that looked like results:
+
+**RSI returned 100 for a flat series.** A naive `loss === 0 ? 100` guard sends
+zero-movement down the same branch as all-gains, so an unmoved asset read as
+maximally overbought and scored −40. Caught by a hand-computed fixture, not by
+comparing against another library — which would have agreed if it shared the
+same misreading.
+
+**The default signal threshold selected nothing.** Measured across 5,100 scored
+bars, `|score|` exceeds 50 approximately 0.0% of the time, because RSI is read
+as mean-reversion while EMA spread is trend-following and the two partly cancel.
+The backtest ran zero trades and reported a 0% hit rate as though that were a
+finding. Threshold is now 25, sitting near the 90th percentile of the real
+distribution.
 
 ## Stack
 
@@ -87,18 +106,30 @@ The UI renders `generatedAt` from the payload rather than claiming "live".
 npm install
 npm run dev
 
-npm test              # engine unit + property tests
-npm run backtest      # CLI harness over committed bars
+npm test              # 145 tests: indicators, scoring, backtest, parsers, intent
+npm run typecheck
+npm run build
+
+npm run fetch:prices  # keyless — writes dist-data/prices.json
+npm run fetch:news    # keyless — Yahoo RSS + SEC EDGAR
 ```
+
+To develop against locally fetched data instead of the published `data` branch,
+set `VITE_DATA_BASE=/dist-data` before `npm run dev`.
 
 ## Repository
 
 ```
 .github/workflows/    deploy · fetch-prices · fetch-news · keepalive
-scripts/              CI fetchers (Yahoo RSS + SEC EDGAR are keyless)
-worker/               Cloudflare Worker — key custody + rate limit
-src/engine/           indicators, scoring, backtest — pure, no I/O
+scripts/
+  providers/          stooq (primary) · yahoo (fallback), both keyless
+  fetch-prices.mjs    validation gates before publish
+  fetch-news.mjs      Yahoo RSS + SEC EDGAR
+src/engine/           indicators · score · backtest — pure, no I/O, no clock
+src/workers/          backtest off the main thread
+src/copilot/          intent classifier — refuses advice before inference
 src/data/             curated universe, committed, never fetched
+src/components/       dashboard, score decomposition, validation
 public/wireframes/    served at /tickrlab/wireframes/
 ```
 
