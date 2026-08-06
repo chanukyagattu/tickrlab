@@ -1,0 +1,57 @@
+# .github/workflows/deploy.yml
+#
+# INTERIM STATE — publishes public/ directly, with no build step, so the
+# wireframes are live before the app exists. The README already links to
+# /tickrlab/wireframes/ and a dead link on a portfolio project is worse
+# than a missing one.
+#
+# WHEN THE VITE APP LANDS, change two things:
+#   1. Add the setup-node / npm ci / npm run build steps below.
+#   2. Change upload path from ./public to ./dist.
+# The published URL for the wireframes does not change either way, because
+# Vite copies public/ into dist/ verbatim. That is why they live in public/
+# rather than docs/.
+
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy midway; do not run two at once.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- once the app exists, uncomment: ---
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
+      #     cache: 'npm'
+      # - run: npm ci
+      # - run: npm run build      # vite build -> dist/ (copies public/ in)
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public          # -> ./dist once the build step is enabled
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
