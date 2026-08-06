@@ -104,7 +104,12 @@ public/wireframes/    served at /tickrlab/wireframes/
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE) — see [NOTICE](NOTICE) for attribution and the
+warranty/liability position.
+
+Apache rather than MIT deliberately: §3 grants an explicit patent license and
+§7–8 spell out the warranty and liability disclaimers in terms, which matters
+more than usual for software that computes and displays financial indicators.
 
 ---
 
