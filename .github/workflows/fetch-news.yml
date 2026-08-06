@@ -1,0 +1,80 @@
+# .github/workflows/fetch-news.yml
+#
+# Yahoo Finance RSS and SEC EDGAR are both free and keyless, but neither
+# sends CORS headers, so a browser cannot read them directly. Fetching in
+# CI sidesteps CORS entirely — there is no browser origin in Actions.
+#
+# Cadence honesty: GitHub cron is best-effort. A */30 schedule realistically
+# lands every 30-45 minutes and is occasionally skipped under load. The UI
+# therefore renders `generatedAt` from the payload rather than claiming
+# "live".
+
+name: Fetch news
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-branch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch RSS + EDGAR
+        env:
+          # SEC requires a descriptive User-Agent with contact details and
+          # will 403 without one. This is in their published access policy,
+          # not a rate limit.
+          SEC_USER_AGENT: 'TickrLab/1.0 (chanukyasharma@gmail.com)'
+        run: node scripts/fetch-news.mjs --out dist-data
+
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node -e '
+            const d = require("./dist-data/news.json");
+            if (!Array.isArray(d.items) || d.items.length === 0) {
+              console.error("no items; refusing to publish"); process.exit(1);
+            }
+            console.log(`ok: ${d.items.length} items`);
+          '
+
+      # Prices and news publish to the same branch, so this job must not
+      # clobber prices.json. Pull the existing branch first, overlay only
+      # the file this job owns, then republish as one commit.
+      - name: Publish to data branch
+        run: |
+          set -euo pipefail
+
+          git clone -q --depth 1 --branch data \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            existing || mkdir -p existing
+
+          rm -rf existing/.git
+          cp dist-data/news.json existing/news.json
+
+          cd existing
+          git init -q
+          git checkout -qb data
+          git config user.name  'tickrlab-bot'
+          git config user.email 'actions@github.com'
+          git add -A
+          git commit -qm "data: news $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push -q --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            data

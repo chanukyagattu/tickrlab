@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TickrLab — Idea and Wireframes</title>
+<style>
+  :root {
+    --bg:      #0b0f14;
+    --panel:   #11171f;
+    --line:    #2a3441;
+    --line-hi: #3d4b5c;
+    --ink:     #e6edf3;
+    --ink-dim: #8b98a5;
+    --ink-faint:#5a6673;
+    --accent:  #2dd4a7;
+    --accent-d:#157878;
+    --bear:    #f0616d;
+    --bull:    #2dd4a7;
+    --warn:    #e3b341;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 56px 0 40px; margin-bottom: 48px;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  h1 { font-size: 44px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .tagline { color: var(--ink-dim); font-size: 17px; max-width: 62ch; margin: 0 0 22px; }
+  .metarow {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .chip {
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 4px 11px; color: var(--ink-dim); background: var(--panel);
+  }
+  .chip.on { border-color: var(--accent-d); color: var(--accent); }
+
+  h2.screen-title {
+    font-size: 13px; font-family: var(--mono); letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim);
+    margin: 0 0 4px; display: flex; align-items: baseline; gap: 12px;
+  }
+  h2.screen-title .num {
+    color: var(--bg); background: var(--accent); border-radius: 4px;
+    padding: 1px 7px; font-size: 11px; font-weight: 700;
+  }
+  .screen-lede { color: var(--ink-dim); font-size: 15px; margin: 0 0 20px; max-width: 70ch; }
+  section.screen { margin-bottom: 72px; }
+
+  /* ---- wireframe primitives ---- */
+  .frame {
+    border: 1px solid var(--line-hi); border-radius: 10px;
+    background: var(--panel); overflow: hidden;
+  }
+  .box {
+    border: 1px dashed var(--line-hi); border-radius: 6px;
+    padding: 10px; position: relative; min-height: 0;
+  }
+  .lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
+  }
+  .ph { background: var(--line); border-radius: 3px; height: 8px; }
+  .ph.sm { height: 6px; }
+  .marker {
+    position: absolute; top: -9px; right: -9px; z-index: 3;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+    font: 700 11px/20px var(--mono); text-align: center;
+  }
+
+  /* ---- annotations ---- */
+  .notes { margin-top: 18px; display: grid; gap: 10px; }
+  .note { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; }
+  .note b {
+    width: 20px; height: 20px; border-radius: 50%; margin-top: 3px;
+    background: var(--accent); color: var(--bg);
+    font: 700 11px/20px var(--mono); text-align: center;
+  }
+  .note p { margin: 0; font-size: 14.5px; color: var(--ink-dim); }
+  .note p strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- dashboard layout ---- */
+  .tape {
+    display: flex; gap: 22px; align-items: center;
+    border-bottom: 1px solid var(--line); padding: 9px 14px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-dim);
+    overflow: hidden; white-space: nowrap;
+  }
+  .brand { color: var(--ink); font-weight: 700; letter-spacing: .04em; }
+  .up { color: var(--bull); } .down { color: var(--bear); }
+
+  .dash { display: grid; grid-template-columns: 158px 1fr 236px; min-height: 470px; }
+  .col { padding: 12px; }
+  .col + .col { border-left: 1px solid var(--line); }
+  .center { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+
+  .sector { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); }
+  .sector div { padding: 3px 0; }
+  .sector .kid { padding-left: 14px; color: var(--ink-faint); }
+  .sector .sel { color: var(--accent); }
+
+  table.grid { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+  table.grid th {
+    text-align: left; color: var(--ink-faint); font-weight: 400;
+    border-bottom: 1px solid var(--line); padding: 5px 6px;
+    font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  table.grid td { padding: 6px; border-bottom: 1px solid rgba(42,52,65,.5); color: var(--ink-dim); }
+  table.grid td.sym { color: var(--ink); font-weight: 600; }
+  .sect-tag {
+    font-size: 9px; border: 1px solid var(--line-hi); border-radius: 3px;
+    padding: 1px 5px; color: var(--ink-faint); white-space: nowrap;
+  }
+  .meter-mini { display: inline-flex; align-items: center; gap: 6px; }
+  .track { width: 54px; height: 5px; background: var(--line); border-radius: 3px; position: relative; }
+  .track i { position: absolute; top: 0; height: 5px; border-radius: 3px; }
+  .track .mid { position: absolute; left: 50%; top: -2px; width: 1px; height: 9px; background: var(--ink-faint); }
+
+  .news-item { border-bottom: 1px solid rgba(42,52,65,.6); padding: 8px 0; }
+  .news-meta { font-family: var(--mono); font-size: 9px; color: var(--ink-faint); letter-spacing: .06em; }
+  .src-tag { color: var(--warn); }
+
+  .disclaimer-bar {
+    border-top: 1px solid var(--line); padding: 8px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 10px; color: var(--ink-faint);
+  }
+  .fab { border: 1px solid var(--accent-d); color: var(--accent); border-radius: 999px; padding: 3px 12px; }
+
+  /* ---- gauge ---- */
+  .gauge-wrap { display: flex; gap: 20px; align-items: center; }
+  .bars { flex: 1; display: grid; gap: 7px; }
+  .barrow { display: grid; grid-template-columns: 74px 1fr 40px; gap: 9px; align-items: center;
+            font-family: var(--mono); font-size: 10px; color: var(--ink-faint); }
+  .bartrack { height: 7px; background: var(--line); border-radius: 4px; position: relative; }
+  .bartrack i { position: absolute; height: 7px; border-radius: 4px; }
+  .bartrack .mid { position: absolute; left: 50%; top: -2px; width: 1px; height: 11px; background: var(--ink-faint); }
+
+  /* ---- chat ---- */
+  .bubble { border-radius: 10px; padding: 9px 12px; font-size: 12.5px; max-width: 88%; margin-bottom: 9px; }
+  .bubble.user { background: var(--line); margin-left: auto; color: var(--ink); }
+  .bubble.bot { background: rgba(45,212,167,.07); border: 1px solid rgba(45,212,167,.22); color: var(--ink-dim); }
+  .bubble.refuse { background: rgba(224,97,109,.07); border: 1px solid rgba(240,97,109,.28); }
+  .bot-disc { font-family: var(--mono); font-size: 9px; color: var(--ink-faint); margin-top: 7px;
+              border-top: 1px solid var(--line); padding-top: 5px; }
+
+  /* ---- mobile ---- */
+  .phones { display: flex; gap: 20px; flex-wrap: wrap; }
+  .phone { width: 224px; border: 1px solid var(--line-hi); border-radius: 20px; background: var(--panel);
+           padding: 9px; position: relative; }
+  .notch { width: 56px; height: 4px; background: var(--line-hi); border-radius: 3px; margin: 3px auto 9px; }
+
+  /* ---- modal ---- */
+  .modal-scrim { background: rgba(0,0,0,.55); padding: 46px 20px; }
+  .modal {
+    max-width: 480px; margin: 0 auto; background: var(--panel);
+    border: 1px solid var(--line-hi); border-radius: 10px; padding: 22px;
+  }
+  .btn { border: 1px solid var(--accent-d); background: rgba(45,212,167,.1); color: var(--accent);
+         border-radius: 6px; padding: 8px 16px; font-family: var(--mono); font-size: 11px; display: inline-block; }
+  .btn.ghost { border-color: var(--line-hi); color: var(--ink-faint); background: none; }
+
+  code.k { font-family: var(--mono); font-size: .88em; background: var(--line);
+           padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+
+  footer.foot { border-top: 1px solid var(--line); padding-top: 26px; color: var(--ink-faint); font-size: 13px; }
+  footer.foot a { color: var(--accent); }
+
+  @media (max-width: 820px) {
+    .dash { grid-template-columns: 1fr; }
+    .col + .col { border-left: none; border-top: 1px solid var(--line); }
+    h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Idea and Wireframes</div>
+  <h1>TickrLab</h1>
+  <p class="tagline">
+    A market dashboard that computes its own signals in the browser, publishes
+    its own data from CI, and shows you how often it has been wrong.
+  </p>
+  <div class="metarow">
+    <span class="chip on">React 19 · TypeScript</span>
+    <span class="chip on">GitHub Actions as backend</span>
+    <span class="chip">lightweight-charts</span>
+    <span class="chip">Zustand</span>
+    <span class="chip">Cloudflare Workers AI</span>
+    <span class="chip">Zero servers</span>
+  </div>
+</header>
+
+<!-- ============================ 1 ============================ -->
+<section class="screen">
+  <h2 class="screen-title"><span class="num">01</span> Disclaimer Gate — first visit</h2>
+  <p class="screen-lede">
+    Blocking, not dismissible by clicking outside, and recorded in
+    <code class="k">localStorage</code> so it appears once. The name does the
+    positioning work: this is a lab, not a service.
+  </p>
+
+  <div class="frame">
+    <div class="modal-scrim">
+      <div class="modal box" style="border-style: solid;">
+        <span class="marker">1</span>
+        <div class="lbl">Before you continue</div>
+        <p style="font-size:14px;margin:0 0 12px;color:var(--ink)">
+          <strong>TickrLab is not financial advice.</strong>
+        </p>
+        <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">
+          This is a technical demonstration. Data may be delayed, incomplete, or
+          incorrect. Scores are mechanical calculations with
+          <strong style="color:var(--ink)">no demonstrated predictive value</strong> —
+          measured hit rate is published on the Validation tab. Nothing here is an
+          offer to buy or sell any security.
+        </p>
+        <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 16px">
+          Do your own research and consult a licensed financial advisor.
+        </p>
+        <span class="btn">I understand — continue</span>
+        <span class="btn ghost">Read the design doc</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>1</b><p>
+      Links straight to the measured hit rate rather than burying it. <strong>Volunteering
+      the weakness is the credibility move</strong> — anyone evaluating this technically will
+      check whether the signals work, and finding that you already answered it changes the read.
+    </p></div>
+  </div>
+</section>
+
+<!-- ============================ 2 ============================ -->
+<section class="screen">
+  <h2 class="screen-title"><span class="num">02</span> Main Dashboard — desktop</h2>
+  <p class="screen-lede">
+    Three columns: sector navigation, the scored asset grid over a chart, and a news rail.
+    Crypto rows stream live over WebSocket; equity and ETF rows read the static JSON that CI published.
+  </p>
+
+  <div class="frame">
+    <div class="tape">
+      <span class="brand">TICKRLAB</span>
+      <span>S&amp;P <span class="up">▲ 0.41%</span></span>
+      <span>NDX <span class="up">▲ 0.77%</span></span>
+      <span>GOLD <span class="down">▼ 0.12%</span></span>
+      <span>OIL <span class="up">▲ 1.30%</span></span>
+      <span>10Y <span class="down">▼ 0.04%</span></span>
+      <span>BTC <span class="up">▲ 2.14%</span></span>
+      <span style="margin-left:auto;color:var(--ink-faint)">prices 18:40Z · news 09:12Z</span>
+    </div>
+
+    <div class="dash">
+      <!-- left -->
+      <div class="col">
+        <div class="box" style="height:100%">
+          <span class="marker">1</span>
+          <div class="lbl">Sector / Industry</div>
+          <div class="sector">
+            <div class="sel">▾ Technology</div>
+            <div class="kid sel">Semiconductors&nbsp;&nbsp;7</div>
+            <div class="kid">Software&nbsp;&nbsp;6</div>
+            <div class="kid">Hardware&nbsp;&nbsp;3</div>
+            <div>▾ Financials</div>
+            <div class="kid">Banks&nbsp;&nbsp;4</div>
+            <div class="kid">Insurance&nbsp;&nbsp;3</div>
+            <div class="kid">Capital Mkts&nbsp;&nbsp;2</div>
+            <div>▸ Communication</div>
+            <div>▸ Healthcare</div>
+            <div>▸ Energy</div>
+            <div>▾ Fixed Income</div>
+            <div class="kid">Long Treasury&nbsp;&nbsp;2</div>
+            <div class="kid">Credit&nbsp;&nbsp;2</div>
+            <div>▾ Commodities</div>
+            <div class="kid">Metals&nbsp;&nbsp;3</div>
+            <div class="kid">Energy&nbsp;&nbsp;2</div>
+            <div>▾ Crypto <span style="color:var(--bull)">● live</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- center -->
+      <div class="col center">
+        <div class="box">
+          <span class="marker">2</span>
+          <div class="lbl">Assets — sorted by momentum score</div>
+          <table class="grid">
+            <thead>
+              <tr><th>Ticker</th><th>Name</th><th>Industry</th><th>Price</th><th>Chg</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="sym">NVDA</td><td>NVIDIA Corp</td>
+                <td><span class="sect-tag">Semiconductors</span></td>
+                <td>182.44</td><td class="up">+2.10%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:50%;width:20px;background:var(--bull)"></i></span> <span class="up">+72</span></span></td>
+              </tr>
+              <tr>
+                <td class="sym">AVGO</td><td>Broadcom Inc</td>
+                <td><span class="sect-tag">Semiconductors</span></td>
+                <td>341.02</td><td class="up">+1.04%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:50%;width:12px;background:var(--bull)"></i></span> <span class="up">+44</span></span></td>
+              </tr>
+              <tr>
+                <td class="sym">AMD</td><td>Advanced Micro Dev</td>
+                <td><span class="sect-tag">Semiconductors</span></td>
+                <td>147.90</td><td class="down">-0.42%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:47%;width:3px;background:var(--ink-dim)"></i></span> <span>-08</span></span></td>
+              </tr>
+              <tr>
+                <td class="sym">MU</td><td>Micron Technology</td>
+                <td><span class="sect-tag">Semiconductors</span></td>
+                <td>98.31</td><td class="down">-1.88%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:33%;width:17px;background:var(--bear)"></i></span> <span class="down">-61</span></span></td>
+              </tr>
+              <tr>
+                <td class="sym">BTCUSDT</td><td>Bitcoin <span class="up">●</span></td>
+                <td><span class="sect-tag">Crypto</span></td>
+                <td>71,204.10</td><td class="up">+2.14%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:50%;width:15px;background:var(--bull)"></i></span> <span class="up">+55</span></span></td>
+              </tr>
+              <tr>
+                <td class="sym">TLT</td><td>iShares 20+ Yr Treasury</td>
+                <td><span class="sect-tag">Long Treasury</span></td>
+                <td>88.17</td><td class="down">-0.33%</td>
+                <td><span class="meter-mini"><span class="track"><i class="mid"></i><i style="left:38%;width:12px;background:var(--bear)"></i></span> <span class="down">-41</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="box">
+          <span class="marker">3</span>
+          <div class="lbl">NVDA · candles + volume &nbsp;·&nbsp; 1D 1W 1M 3M 1Y</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:104px;padding-top:6px">
+            <div class="ph" style="width:5px;height:34%"></div><div class="ph" style="width:5px;height:48%"></div>
+            <div class="ph" style="width:5px;height:41%"></div><div class="ph" style="width:5px;height:62%"></div>
+            <div class="ph" style="width:5px;height:55%"></div><div class="ph" style="width:5px;height:71%"></div>
+            <div class="ph" style="width:5px;height:66%;background:var(--bull)"></div>
+            <div class="ph" style="width:5px;height:84%;background:var(--bull)"></div>
+            <div class="ph" style="width:5px;height:77%"></div><div class="ph" style="width:5px;height:92%"></div>
+            <div class="ph" style="width:5px;height:81%"></div><div class="ph" style="width:5px;height:97%;background:var(--bull)"></div>
+            <div style="flex:1"></div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);align-self:flex-start">
+              EMA20 ─── &nbsp; EMA50 ┈┈┈
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right -->
+      <div class="col">
+        <div class="box" style="height:100%">
+          <span class="marker">4</span>
+          <div class="lbl">News &amp; Filings</div>
+          <div class="news-item">
+            <div class="news-meta"><span class="src-tag">SEC 8-K</span> · NVDA · 14m</div>
+            <div style="font-size:11.5px">Results of Operations and Financial Condition</div>
+          </div>
+          <div class="news-item">
+            <div class="news-meta">YAHOO · SEMIS · 31m</div>
+            <div style="font-size:11.5px">Memory pricing firms into Q4 as hyperscaler orders extend</div>
+          </div>
+          <div class="news-item">
+            <div class="news-meta">YAHOO · MACRO · 1h</div>
+            <div style="font-size:11.5px">Treasury yields edge higher ahead of auction</div>
+          </div>
+          <div class="news-item">
+            <div class="news-meta"><span class="src-tag">SEC 10-Q</span> · AVGO · 2h</div>
+            <div style="font-size:11.5px">Quarterly report filed</div>
+          </div>
+          <div class="news-item" style="border:none">
+            <div class="news-meta">YAHOO · CRYPTO · 2h</div>
+            <div style="font-size:11.5px">Spot ETF flows positive for a fourth session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer-bar">
+      <span><span style="color:var(--warn)">⚠</span> Not financial advice · mechanical indicators only · data may be delayed or wrong</span>
+      <span class="fab">💬 Ask TickrLab</span>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>1</b><p>
+      <strong>Two-level taxonomy</strong> — sector then industry. "Technology" alone is
+      useless; Semiconductors vs Software is what makes the grid worth filtering. Bonds and
+      commodities appear here as ETF proxies, which is how they exist at all on a free tier.
+    </p></div>
+    <div class="note"><b>2</b><p>
+      Score column is a <strong>bar with a centre tick, not a BUY badge</strong>. The tick
+      marks zero so the reader sees magnitude and direction rather than a verdict. Crypto rows
+      carry a live dot; everything else is explicitly end-of-day.
+    </p></div>
+    <div class="note"><b>3</b><p>
+      <code class="k">lightweight-charts</code> on canvas. Timeframes read from the same
+      candle array the score was computed from — <strong>one source of truth</strong>, so the
+      chart can never disagree with the number beside it.
+    </p></div>
+    <div class="note"><b>4</b><p>
+      Yahoo RSS plus <strong>SEC EDGAR filings</strong>. The 8-K and 10-Q tags are the
+      differentiator — free, keyless, and absent from every other portfolio dashboard.
+    </p></div>
+  </div>
+</section>
+
+<!-- ============================ 3 ============================ -->
+<section class="screen">
+  <h2 class="screen-title"><span class="num">03</span> Score Decomposition — the meter</h2>
+  <p class="screen-lede">
+    The centrepiece. A single number is a black box; the four components that produced it are an
+    engineering artifact. Every input is visible and every weight is stated.
+  </p>
+
+  <div class="frame" style="padding:18px">
+    <div class="box" style="margin-bottom:14px">
+      <span class="marker">1</span>
+      <div class="lbl">NVDA · Technical Momentum Score</div>
+      <div class="gauge-wrap">
+        <div style="text-align:center;min-width:118px">
+          <div style="font:700 46px var(--mono);color:var(--bull);line-height:1">+72</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);letter-spacing:.1em">BULLISH</div>
+          <div class="track" style="width:110px;height:7px;margin:11px auto 0">
+            <i class="mid"></i><i style="left:50%;width:40px;background:var(--bull)"></i>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);margin-top:4px">−100 ·· 0 ·· +100</div>
+        </div>
+
+        <div class="bars">
+          <div class="barrow">
+            <span>RSI(14)</span>
+            <span class="bartrack"><i class="mid"></i><i style="left:50%;width:26%;background:var(--bull)"></i></span>
+            <span class="up">+31</span>
+          </div>
+          <div class="barrow">
+            <span>EMA SPREAD</span>
+            <span class="bartrack"><i class="mid"></i><i style="left:50%;width:19%;background:var(--bull)"></i></span>
+            <span class="up">+22</span>
+          </div>
+          <div class="barrow">
+            <span>MACD SLOPE</span>
+            <span class="bartrack"><i class="mid"></i><i style="left:50%;width:12%;background:var(--bull)"></i></span>
+            <span class="up">+13</span>
+          </div>
+          <div class="barrow">
+            <span>VOL vs 20D</span>
+            <span class="bartrack"><i class="mid"></i><i style="left:50%;width:5%;background:var(--bull)"></i></span>
+            <span class="up">+06</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="box">
+        <span class="marker">2</span>
+        <div class="lbl">Inputs</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-dim);line-height:1.9">
+          RSI(14) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31.2 &nbsp;<span style="color:var(--ink-faint)">oversold &lt; 30</span><br>
+          EMA(20) &nbsp;&nbsp;&nbsp;&nbsp;178.40<br>
+          EMA(50) &nbsp;&nbsp;&nbsp;&nbsp;171.09<br>
+          SPREAD/ATR &nbsp;+2.11<br>
+          MACD HIST &nbsp;&nbsp;+0.44 <span style="color:var(--ink-faint)">rising 3d</span><br>
+          VOL / 20D &nbsp;&nbsp;1.81×<br>
+          <span style="color:var(--ink-faint)">candles&nbsp;&nbsp;&nbsp;&nbsp;250 · to 2026-08-04</span>
+        </div>
+      </div>
+      <div class="box">
+        <span class="marker">3</span>
+        <div class="lbl">Honesty panel</div>
+        <div style="font-size:12.5px;color:var(--ink-dim)">
+          This configuration fired <strong style="color:var(--ink)">412 signals</strong> across
+          the universe since 2020.
+          <div style="font-family:var(--mono);font-size:11px;margin:10px 0;line-height:1.9">
+            5d directional hit rate &nbsp;<strong style="color:var(--warn)">53.1%</strong><br>
+            after costs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong style="color:var(--warn)">51.4%</strong><br>
+            vs buy-and-hold &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong class="down">−2.2%</strong>
+          </div>
+          <span style="font-size:11.5px">
+            Barely better than a coin flip, and worse than doing nothing.
+            <a href="#validation" style="color:var(--accent)">See the full backtest →</a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>1</b><p>
+      Called a <strong>Technical Momentum Score</strong>, never "BUY" and never "CALL/PUT".
+      Naming it after what it measures rather than what to do keeps it a measurement.
+    </p></div>
+    <div class="note"><b>2</b><p>
+      Raw inputs printed alongside the score. Anyone can recompute the number by hand from
+      this panel — which is the definition of auditable, and the reason the LLM is never
+      allowed to produce these figures.
+    </p></div>
+    <div class="note"><b>3</b><p>
+      <strong>The panel that makes the project.</strong> Publishing a 51% post-cost hit rate
+      next to your own signal is the single most differentiating element here. It reframes the
+      work from "I built a trading tool" to "I built a measurement instrument and measured it."
+    </p></div>
+  </div>
+</section>
+
+<!-- ============================ 4 ============================ -->
+<section class="screen" id="validation">
+  <h2 class="screen-title"><span class="num">04</span> Validation — backtest</h2>
+  <p class="screen-lede">
+    Runs in a Web Worker over years of committed daily bars. This is the legitimate use for a
+    worker — not RSI over 50 candles, which takes microseconds.
+  </p>
+
+  <div class="frame" style="padding:18px">
+    <div style="display:grid;grid-template-columns:1fr 262px;gap:14px">
+      <div class="box">
+        <span class="marker">1</span>
+        <div class="lbl">Equity curve · strategy vs buy &amp; hold</div>
+        <div style="position:relative;height:150px;margin-top:8px">
+          <svg viewBox="0 0 460 150" style="width:100%;height:150px">
+            <line x1="0" y1="112" x2="460" y2="112" stroke="#2a3441"/>
+            <line x1="0" y1="75"  x2="460" y2="75"  stroke="#2a3441" stroke-dasharray="3 4"/>
+            <line x1="0" y1="38"  x2="460" y2="38"  stroke="#2a3441" stroke-dasharray="3 4"/>
+            <polyline fill="none" stroke="#5a6673" stroke-width="1.6" stroke-dasharray="4 4"
+              points="0,112 46,104 92,96 138,84 184,88 230,70 276,58 322,52 368,40 414,30 460,22"/>
+            <polyline fill="none" stroke="#2dd4a7" stroke-width="1.8"
+              points="0,112 46,107 92,100 138,95 184,99 230,86 276,80 322,76 368,66 414,60 460,54"/>
+          </svg>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);position:absolute;bottom:-2px;left:0">
+            2020 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2021 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2022 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2023 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2024 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2025 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2026
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;position:absolute;top:0;right:0">
+            <span style="color:var(--ink-faint)">┈ buy &amp; hold</span><br>
+            <span style="color:var(--bull)">─ strategy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <span class="marker">2</span>
+        <div class="lbl">Results</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink-dim);line-height:2">
+          signals &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;412<br>
+          hit rate &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;53.1%<br>
+          after costs &nbsp;&nbsp;&nbsp;51.4%<br>
+          sharpe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.41<br>
+          max dd &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="down">−24.8%</span><br>
+          vs b&amp;h &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="down">−2.2%</span><br>
+          <span style="color:var(--ink-faint)">worker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.9s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:14px">
+      <span class="marker">3</span>
+      <div class="lbl">Parameters — recompute live</div>
+      <div style="display:flex;gap:26px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--ink-faint)">
+        <span>RSI PERIOD &nbsp;<span style="color:var(--ink)">14</span> ──●──</span>
+        <span>EMA FAST &nbsp;<span style="color:var(--ink)">20</span> ──●──</span>
+        <span>EMA SLOW &nbsp;<span style="color:var(--ink)">50</span> ──●──</span>
+        <span>HOLD DAYS &nbsp;<span style="color:var(--ink)">5</span> ─●───</span>
+        <span>COSTS BPS &nbsp;<span style="color:var(--ink)">10</span> ─●───</span>
+        <span style="color:var(--warn)">⚠ overfitting warning shown after 5 re-runs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>1</b><p>
+      Strategy plotted <strong>underneath</strong> buy-and-hold, because that is where it
+      actually lands. Shipping a chart that flatters the strategy would be the easy choice and
+      the wrong one.
+    </p></div>
+    <div class="note"><b>2</b><p>
+      Worker runtime displayed as a first-class metric. It gives you a concrete performance
+      number to quote, and it is honest instrumentation rather than a claim.
+    </p></div>
+    <div class="note"><b>3</b><p>
+      Sliders re-run the backtest live — and after five parameter sweeps the UI warns about
+      <strong>overfitting</strong>. Building the critique of your own tool into the tool is
+      unusual enough to be worth talking about.
+    </p></div>
+  </div>
+</section>
+
+<!-- ============================ 5 ============================ -->
+<section class="screen">
+  <h2 class="screen-title"><span class="num">05</span> Copilot — narrator, not oracle</h2>
+  <p class="screen-lede">
+    Scores are computed client-side and passed to the model as context. The model explains
+    numbers it did not produce, so it cannot hallucinate a price, an RSI, or a hit rate.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="frame" style="padding:14px">
+      <div class="box" style="border:none;padding:0">
+        <span class="marker">1</span>
+        <div class="lbl">Ask TickrLab</div>
+        <div class="bubble user">Why is NVDA showing bullish?</div>
+        <div class="bubble bot">
+          Its momentum score is <strong style="color:var(--bull)">+72</strong>, driven mostly by
+          RSI. At <strong>31.2</strong> RSI(14) is near the oversold threshold of 30, contributing
+          +31. EMA(20) sits above EMA(50) by 2.11 ATR (+22), MACD histogram has risen three
+          sessions (+13), and volume is 1.81× its 20-day average (+6).
+          <div style="margin-top:8px">
+            Worth knowing: this configuration has been directionally right
+            <strong>53.1%</strong> of the time over 412 historical signals — 51.4% after costs.
+          </div>
+          <div class="bot-disc">⚠ Not financial advice · appended by the UI, not the model</div>
+        </div>
+        <div class="bubble user">Should I buy it?</div>
+        <div class="bubble bot refuse">
+          I can't answer that — TickrLab doesn't make buy or sell recommendations, and these
+          scores have no demonstrated predictive value. I can explain what any indicator on
+          screen measures, or how it's calculated.
+          <div class="bot-disc">↳ blocked by intent classifier · 0 tokens spent</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame" style="padding:14px">
+      <div class="box" style="height:100%">
+        <span class="marker">2</span>
+        <div class="lbl">Request path</div>
+        <div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);line-height:2">
+          <span style="color:var(--ink)">query</span><br>
+          &nbsp;&nbsp;↓<br>
+          <span style="color:var(--warn)">intent classifier</span> <span style="color:var(--ink-faint)">(regex, local)</span><br>
+          &nbsp;&nbsp;├─ advice? &nbsp;→ <span class="down">canned refusal, no call</span><br>
+          &nbsp;&nbsp;├─ filter? &nbsp;→ <span style="color:var(--accent)">tool call, UI applies</span><br>
+          &nbsp;&nbsp;└─ explain? ↓<br>
+          <span style="color:var(--ink)">build context</span><br>
+          &nbsp;&nbsp;<span style="color:var(--ink-faint)">{ scores, inputs, hitRate }</span><br>
+          &nbsp;&nbsp;↓<br>
+          <span style="color:var(--ink)">Cloudflare Worker</span><br>
+          &nbsp;&nbsp;<span style="color:var(--ink-faint)">key + IP rate limit</span><br>
+          &nbsp;&nbsp;↓<br>
+          <span style="color:var(--ink)">Workers AI</span> <span style="color:var(--ink-faint)">(Llama)</span><br>
+          &nbsp;&nbsp;↓<br>
+          <span style="color:var(--ink)">render + append disclaimer</span>
+        </div>
+        <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px;
+                    font-size:11.5px;color:var(--ink-faint)">
+          <span class="marker" style="position:static;display:inline-block;margin-right:6px">3</span>
+          Numbers enter as context and leave as prose. The model is a
+          <strong style="color:var(--ink)">presentation layer over deterministic compute</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>1</b><p>
+      Two scoped jobs: <strong>explain what's on screen</strong>, and teach mechanics.
+      Should-I-buy, price predictions, and broker recommendations are refused.
+    </p></div>
+    <div class="note"><b>2</b><p>
+      A local regex classifier runs before any inference. It is the safety layer
+      <em>and</em> the cost control — refusals cost nothing. Prompt-injection cases belong in
+      the test suite, and saying so in the README is a strong current signal.
+    </p></div>
+    <div class="note"><b>3</b><p>
+      The disclaimer is appended by the <strong>UI</strong>, not requested in the prompt, so
+      no amount of jailbreaking removes it.
+    </p></div>
+  </div>
+</section>
+
+<!-- ============================ 6 ============================ -->
+<section class="screen">
+  <h2 class="screen-title"><span class="num">06</span> Mobile</h2>
+  <p class="screen-lede">
+    Columns collapse to a stack. The score decomposition stays — it is the product, not a detail view.
+  </p>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="box" style="padding:8px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);margin-bottom:7px">
+          TICKRLAB &nbsp; <span style="float:right">⚙ 💬</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-dim);border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:7px">
+          ALL · TECH · FIN · BONDS · CRYPTO
+        </div>
+        <table class="grid" style="font-size:10px">
+          <tbody>
+            <tr><td class="sym">NVDA</td><td class="up">+2.10%</td><td class="up">+72</td></tr>
+            <tr><td class="sym">AVGO</td><td class="up">+1.04%</td><td class="up">+44</td></tr>
+            <tr><td class="sym">AMD</td><td class="down">−0.42%</td><td>−08</td></tr>
+            <tr><td class="sym">MU</td><td class="down">−1.88%</td><td class="down">−61</td></tr>
+            <tr><td class="sym">BTC</td><td class="up">+2.14%</td><td class="up">+55</td></tr>
+            <tr><td class="sym">TLT</td><td class="down">−0.33%</td><td class="down">−41</td></tr>
+          </tbody>
+        </table>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink-faint);border-top:1px solid var(--line);margin-top:7px;padding-top:5px">
+          ⚠ Not financial advice
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="box" style="padding:8px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);margin-bottom:7px">‹ NVDA</div>
+        <div style="text-align:center;padding:5px 0">
+          <div style="font:700 30px var(--mono);color:var(--bull);line-height:1">+72</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--ink-dim)">BULLISH</div>
+        </div>
+        <div class="bars" style="margin-top:8px">
+          <div class="barrow" style="grid-template-columns:52px 1fr 24px;font-size:8px">
+            <span>RSI</span><span class="bartrack" style="height:5px"><i class="mid"></i><i style="left:50%;width:26%;height:5px;background:var(--bull)"></i></span><span class="up">+31</span>
+          </div>
+          <div class="barrow" style="grid-template-columns:52px 1fr 24px;font-size:8px">
+            <span>EMA</span><span class="bartrack" style="height:5px"><i class="mid"></i><i style="left:50%;width:19%;height:5px;background:var(--bull)"></i></span><span class="up">+22</span>
+          </div>
+          <div class="barrow" style="grid-template-columns:52px 1fr 24px;font-size:8px">
+            <span>MACD</span><span class="bartrack" style="height:5px"><i class="mid"></i><i style="left:50%;width:12%;height:5px;background:var(--bull)"></i></span><span class="up">+13</span>
+          </div>
+          <div class="barrow" style="grid-template-columns:52px 1fr 24px;font-size:8px">
+            <span>VOL</span><span class="bartrack" style="height:5px"><i class="mid"></i><i style="left:50%;width:5%;height:5px;background:var(--bull)"></i></span><span class="up">+06</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:2px;height:44px;margin-top:10px">
+          <div class="ph" style="width:4px;height:40%"></div><div class="ph" style="width:4px;height:58%"></div>
+          <div class="ph" style="width:4px;height:49%"></div><div class="ph" style="width:4px;height:72%"></div>
+          <div class="ph" style="width:4px;height:64%"></div><div class="ph" style="width:4px;height:88%;background:var(--bull)"></div>
+          <div class="ph" style="width:4px;height:80%"></div><div class="ph" style="width:4px;height:96%;background:var(--bull)"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--warn);margin-top:8px">
+          53.1% hit rate · 412 signals
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="box" style="padding:8px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink-faint);margin-bottom:7px">‹ ASK TICKRLAB</div>
+        <div class="bubble user" style="font-size:10px;padding:6px 9px">What is RSI?</div>
+        <div class="bubble bot" style="font-size:10px;padding:6px 9px">
+          A 0–100 measure of how much of recent movement has been upward. Below 30 is
+          conventionally "oversold", above 70 "overbought" — descriptions of recent
+          behaviour, not forecasts.
+          <div class="bot-disc" style="font-size:7.5px">⚠ Not financial advice</div>
+        </div>
+        <div style="border:1px dashed var(--line-hi);border-radius:6px;padding:5px;
+                    font-family:var(--mono);font-size:8px;color:var(--ink-faint);margin-top:6px">
+          Ask about anything on screen…
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p style="margin:0 0 8px">
+    <strong style="color:var(--ink)">TickrLab</strong> —
+    <a href="https://github.com/chanukyagattu/tickrlab">GitHub</a> ·
+    <a href="https://chanukyagattu.github.io/tickrlab/">Docs</a> ·
+    <a href="https://chanukyagattu.github.io/portfolio/">Portfolio</a>
+  </p>
+  <p style="margin:0;font-size:12px">
+    Wireframes are illustrative. All tickers, prices, scores, and backtest figures shown are
+    fabricated for layout purposes. <strong style="color:var(--ink-dim)">Nothing here is financial advice.</strong>
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

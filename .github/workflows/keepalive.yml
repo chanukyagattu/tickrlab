@@ -1,0 +1,100 @@
+# .github/workflows/keepalive.yml
+#
+# WHY THIS EXISTS
+# ---------------
+# GitHub disables scheduled (cron) workflows in a repository after 60 days
+# with no repository activity. For a portfolio project this is the worst
+# possible failure mode: the site keeps loading, the data silently goes
+# stale, and it breaks exactly when nobody is pushing commits — which is
+# precisely when a recruiter is most likely to open it.
+#
+# This job does two things every week:
+#   1. Pushes a trivial commit, which resets the 60-day inactivity clock.
+#   2. Explicitly re-enables the data workflows via the REST API, which
+#      recovers the repo even if the clock already expired.
+#
+# Step 2 is belt-and-braces. Step 1 alone is usually sufficient, but a
+# self-healing job is cheap and this is the kind of operational detail
+# worth being able to point at in an interview.
+
+name: Keepalive
+
+on:
+  schedule:
+    # 06:17 UTC every Monday. Deliberately an odd minute — jobs scheduled
+    # on the hour queue behind everyone else's and are the most likely to
+    # be delayed or dropped under GitHub Actions load.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Touch heartbeat file and push
+        run: |
+          set -euo pipefail
+
+          mkdir -p .github
+          cat > .github/HEARTBEAT.md <<EOF
+          # Heartbeat
+
+          Written by \`.github/workflows/keepalive.yml\` to keep scheduled
+          workflows enabled. GitHub disables cron after 60 days of repository
+          inactivity. Do not delete this file or the data pipeline will
+          eventually stop running.
+
+          Last beat: $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          Run:       ${GITHUB_RUN_ID}
+          EOF
+
+          git config user.name  'tickrlab-bot'
+          git config user.email 'actions@github.com'
+
+          # --allow-empty guards the case where the timestamp somehow
+          # produced an identical file; we still want a commit, because the
+          # commit is the entire point of this job.
+          git add .github/HEARTBEAT.md
+          git commit --allow-empty -m "chore(keepalive): heartbeat $(date -u +'%Y-%m-%d')"
+          git push
+
+      - name: Re-enable scheduled workflows if GitHub disabled them
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Any workflow that runs on a cron must be listed here.
+          for wf in fetch-prices.yml fetch-news.yml; do
+            state=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}" \
+                      --jq '.state' 2>/dev/null || echo 'missing')
+
+            case "$state" in
+              active)
+                echo "::notice::${wf} is active"
+                ;;
+              missing)
+                echo "::warning::${wf} not found — check the filename"
+                ;;
+              *)
+                echo "::warning::${wf} was ${state}; re-enabling"
+                gh api --method PUT \
+                  "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/enable"
+                ;;
+            esac
+          done
