@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TickrLab — signals computed, never asserted</title>
+    <meta
+      name="description"
+      content="A market dashboard that computes its own signals in the browser, publishes its own data from CI, and shows how often it has been wrong. Not financial advice."
+    />
+    <meta name="theme-color" content="#0b0f14" />
+
+    <meta property="og:title" content="TickrLab" />
+    <meta
+      property="og:description"
+      content="Market signals computed in the browser, published from CI, and measured in public. Not financial advice."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chanukyagattu.github.io/tickrlab/" />
+
+    <link rel="preconnect" href="https://raw.githubusercontent.com" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      TickrLab computes every indicator in the browser, so it needs JavaScript
+      enabled. The design document is readable without it:
+      <a href="https://github.com/chanukyagattu/tickrlab/blob/main/DESIGN.md">DESIGN.md</a>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

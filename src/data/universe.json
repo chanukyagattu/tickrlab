@@ -1,0 +1,563 @@
+{
+  "$comment": "Curated and committed. Never fetched at runtime, so it needs no provider, no quota, and cannot go stale. Stooq symbols for STOCK/ETF types are derived as lowercase(ticker) + '.us'; crypto carries an explicit stream symbol.",
+  "assets": {
+    "NVDA": {
+      "name": "NVIDIA Corporation",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Designs GPUs and accelerated computing platforms for gaming, data centers, and AI training and inference."
+    },
+    "AVGO": {
+      "name": "Broadcom Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Semiconductor and infrastructure software supplier spanning networking, broadband, storage, and enterprise software."
+    },
+    "AMD": {
+      "name": "Advanced Micro Devices, Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Designs CPUs, GPUs, and adaptive computing silicon for data center, client, gaming, and embedded markets."
+    },
+    "MU": {
+      "name": "Micron Technology, Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Manufactures DRAM and NAND memory. Highly cyclical, and often an early indicator of the broader semiconductor cycle."
+    },
+    "TSM": {
+      "name": "Taiwan Semiconductor Manufacturing Co.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NYSE",
+      "description": "The largest dedicated semiconductor foundry, manufacturing chips designed by most leading fabless firms."
+    },
+    "INTC": {
+      "name": "Intel Corporation",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Designs and manufactures x86 processors and is building third-party foundry capacity."
+    },
+    "QCOM": {
+      "name": "QUALCOMM Incorporated",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "exchange": "NASDAQ",
+      "description": "Supplies mobile system-on-chip and modem silicon, with a substantial patent licensing business."
+    },
+    "MSFT": {
+      "name": "Microsoft Corporation",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Software",
+      "exchange": "NASDAQ",
+      "description": "Cloud infrastructure, productivity software, and operating systems, with Azure the primary growth driver."
+    },
+    "ORCL": {
+      "name": "Oracle Corporation",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Software",
+      "exchange": "NYSE",
+      "description": "Enterprise database and applications vendor expanding into cloud infrastructure."
+    },
+    "CRM": {
+      "name": "Salesforce, Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Software",
+      "exchange": "NYSE",
+      "description": "Customer relationship management and enterprise application platform delivered as software-as-a-service."
+    },
+    "ADBE": {
+      "name": "Adobe Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Software",
+      "exchange": "NASDAQ",
+      "description": "Creative, document, and marketing software sold on subscription."
+    },
+    "NOW": {
+      "name": "ServiceNow, Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Software",
+      "exchange": "NYSE",
+      "description": "Workflow automation platform for IT service management and enterprise operations."
+    },
+    "AAPL": {
+      "name": "Apple Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Hardware",
+      "exchange": "NASDAQ",
+      "description": "Consumer hardware — iPhone, Mac, wearables — with a large and higher-margin services segment."
+    },
+    "DELL": {
+      "name": "Dell Technologies Inc.",
+      "type": "STOCK",
+      "sector": "Technology",
+      "industry": "Hardware",
+      "exchange": "NYSE",
+      "description": "PCs, servers, and storage, with AI server demand a recent driver of infrastructure revenue."
+    },
+    "GOOGL": {
+      "name": "Alphabet Inc.",
+      "type": "STOCK",
+      "sector": "Communication",
+      "industry": "Interactive Media",
+      "exchange": "NASDAQ",
+      "description": "Search and advertising, YouTube, Android, and Google Cloud."
+    },
+    "META": {
+      "name": "Meta Platforms, Inc.",
+      "type": "STOCK",
+      "sector": "Communication",
+      "industry": "Interactive Media",
+      "exchange": "NASDAQ",
+      "description": "Social platforms monetised through advertising, with heavy capital spending on AI infrastructure."
+    },
+    "T": {
+      "name": "AT&T Inc.",
+      "type": "STOCK",
+      "sector": "Communication",
+      "industry": "Telecom",
+      "exchange": "NYSE",
+      "description": "Wireless and fibre broadband carrier. Capital intensive and typically traded for dividend yield."
+    },
+    "VZ": {
+      "name": "Verizon Communications Inc.",
+      "type": "STOCK",
+      "sector": "Communication",
+      "industry": "Telecom",
+      "exchange": "NYSE",
+      "description": "Wireless and broadband carrier with a similar yield-oriented profile to its peers."
+    },
+    "AMZN": {
+      "name": "Amazon.com, Inc.",
+      "type": "STOCK",
+      "sector": "Consumer Discretionary",
+      "industry": "Internet Retail",
+      "exchange": "NASDAQ",
+      "description": "E-commerce and logistics, with AWS supplying the majority of operating income."
+    },
+    "TSLA": {
+      "name": "Tesla, Inc.",
+      "type": "STOCK",
+      "sector": "Consumer Discretionary",
+      "industry": "Automobiles",
+      "exchange": "NASDAQ",
+      "description": "Electric vehicles, energy storage, and autonomy software. Historically among the highest-volatility large caps."
+    },
+    "JPM": {
+      "name": "JPMorgan Chase & Co.",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Banks",
+      "exchange": "NYSE",
+      "description": "Diversified bank spanning consumer, commercial, investment banking, and asset management."
+    },
+    "BAC": {
+      "name": "Bank of America Corporation",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Banks",
+      "exchange": "NYSE",
+      "description": "Consumer and commercial bank with earnings sensitive to net interest margin."
+    },
+    "PGR": {
+      "name": "The Progressive Corporation",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Insurance",
+      "exchange": "NYSE",
+      "description": "Property and casualty insurer, weighted toward personal auto."
+    },
+    "ALL": {
+      "name": "The Allstate Corporation",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Insurance",
+      "exchange": "NYSE",
+      "description": "Personal lines insurer covering auto, home, and related products."
+    },
+    "GS": {
+      "name": "The Goldman Sachs Group, Inc.",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Capital Markets",
+      "exchange": "NYSE",
+      "description": "Investment bank and trading firm; revenue tracks capital markets activity."
+    },
+    "SCHW": {
+      "name": "The Charles Schwab Corporation",
+      "type": "STOCK",
+      "sector": "Financials",
+      "industry": "Capital Markets",
+      "exchange": "NYSE",
+      "description": "Brokerage and wealth management, with earnings sensitive to rates and client cash balances."
+    },
+    "LLY": {
+      "name": "Eli Lilly and Company",
+      "type": "STOCK",
+      "sector": "Healthcare",
+      "industry": "Pharmaceuticals",
+      "exchange": "NYSE",
+      "description": "Pharmaceutical manufacturer with major diabetes and obesity franchises."
+    },
+    "JNJ": {
+      "name": "Johnson & Johnson",
+      "type": "STOCK",
+      "sector": "Healthcare",
+      "industry": "Pharmaceuticals",
+      "exchange": "NYSE",
+      "description": "Diversified pharmaceutical and medical device company; a common defensive holding."
+    },
+    "UNH": {
+      "name": "UnitedHealth Group Incorporated",
+      "type": "STOCK",
+      "sector": "Healthcare",
+      "industry": "Healthcare Insurance",
+      "exchange": "NYSE",
+      "description": "Health insurance and healthcare services through its Optum segment."
+    },
+    "XOM": {
+      "name": "Exxon Mobil Corporation",
+      "type": "STOCK",
+      "sector": "Energy",
+      "industry": "Integrated Oil & Gas",
+      "exchange": "NYSE",
+      "description": "Integrated oil and gas major spanning upstream, refining, and chemicals."
+    },
+    "CVX": {
+      "name": "Chevron Corporation",
+      "type": "STOCK",
+      "sector": "Energy",
+      "industry": "Integrated Oil & Gas",
+      "exchange": "NYSE",
+      "description": "Integrated energy major with results closely tied to crude and natural gas prices."
+    },
+    "CAT": {
+      "name": "Caterpillar Inc.",
+      "type": "STOCK",
+      "sector": "Industrials",
+      "industry": "Machinery",
+      "exchange": "NYSE",
+      "description": "Construction and mining equipment manufacturer; often read as a global growth proxy."
+    },
+    "GE": {
+      "name": "GE Aerospace",
+      "type": "STOCK",
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "exchange": "NYSE",
+      "description": "Commercial and military jet engines, with a large long-cycle aftermarket services business."
+    },
+    "PG": {
+      "name": "The Procter & Gamble Company",
+      "type": "STOCK",
+      "sector": "Consumer Staples",
+      "industry": "Household Products",
+      "exchange": "NYSE",
+      "description": "Branded household and personal care products; low beta and typically defensive."
+    },
+    "KO": {
+      "name": "The Coca-Cola Company",
+      "type": "STOCK",
+      "sector": "Consumer Staples",
+      "industry": "Beverages",
+      "exchange": "NYSE",
+      "description": "Non-alcoholic beverages, distributed through a global bottling network."
+    },
+
+    "SPY": {
+      "name": "SPDR S&P 500 ETF Trust",
+      "type": "ETF",
+      "sector": "Broad Market",
+      "industry": "US Large Cap",
+      "exchange": "NYSEARCA",
+      "description": "Tracks the S&P 500. The default proxy for US large cap equity exposure."
+    },
+    "QQQ": {
+      "name": "Invesco QQQ Trust",
+      "type": "ETF",
+      "sector": "Broad Market",
+      "industry": "US Large Cap Growth",
+      "exchange": "NASDAQ",
+      "description": "Tracks the Nasdaq-100. Heavily weighted toward technology and growth."
+    },
+    "IWM": {
+      "name": "iShares Russell 2000 ETF",
+      "type": "ETF",
+      "sector": "Broad Market",
+      "industry": "US Small Cap",
+      "exchange": "NYSEARCA",
+      "description": "Tracks the Russell 2000. Small caps are more domestically exposed and more rate sensitive."
+    },
+    "DIA": {
+      "name": "SPDR Dow Jones Industrial Average ETF",
+      "type": "ETF",
+      "sector": "Broad Market",
+      "industry": "US Large Cap Value",
+      "exchange": "NYSEARCA",
+      "description": "Tracks the price-weighted Dow Jones Industrial Average."
+    },
+    "XLK": {
+      "name": "Technology Select Sector SPDR Fund",
+      "type": "ETF",
+      "sector": "Sector",
+      "industry": "Technology",
+      "exchange": "NYSEARCA",
+      "description": "S&P 500 technology sector constituents."
+    },
+    "XLE": {
+      "name": "Energy Select Sector SPDR Fund",
+      "type": "ETF",
+      "sector": "Sector",
+      "industry": "Energy",
+      "exchange": "NYSEARCA",
+      "description": "S&P 500 energy sector constituents; tracks crude closely."
+    },
+    "XLF": {
+      "name": "Financial Select Sector SPDR Fund",
+      "type": "ETF",
+      "sector": "Sector",
+      "industry": "Financials",
+      "exchange": "NYSEARCA",
+      "description": "S&P 500 financial sector constituents."
+    },
+    "XLV": {
+      "name": "Health Care Select Sector SPDR Fund",
+      "type": "ETF",
+      "sector": "Sector",
+      "industry": "Healthcare",
+      "exchange": "NYSEARCA",
+      "description": "S&P 500 healthcare sector constituents; typically defensive."
+    },
+
+    "TLT": {
+      "name": "iShares 20+ Year Treasury Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "Long Treasury",
+      "exchange": "NASDAQ",
+      "description": "US Treasuries with 20+ years to maturity. Proxy for long-end duration.",
+      "proxyFor": "US 20Y+ Treasury bonds",
+      "proxyCaveat": "An ETF wrapper, not the underlying bond: carries expense drag and trades only during US equity hours."
+    },
+    "IEF": {
+      "name": "iShares 7-10 Year Treasury Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "Intermediate Treasury",
+      "exchange": "NASDAQ",
+      "description": "Intermediate Treasuries. Proxy for the belly of the curve.",
+      "proxyFor": "US 7-10Y Treasury notes",
+      "proxyCaveat": "ETF wrapper; expense drag and equity trading hours apply."
+    },
+    "SHY": {
+      "name": "iShares 1-3 Year Treasury Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "Short Treasury",
+      "exchange": "NASDAQ",
+      "description": "Short Treasuries. Low duration, closest of these to a cash proxy.",
+      "proxyFor": "US 1-3Y Treasury notes",
+      "proxyCaveat": "ETF wrapper; expense drag and equity trading hours apply."
+    },
+    "TIP": {
+      "name": "iShares TIPS Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "Inflation Protected",
+      "exchange": "NYSEARCA",
+      "description": "Inflation-protected Treasuries. Spread against IEF reads as a breakeven inflation proxy.",
+      "proxyFor": "US Treasury Inflation-Protected Securities",
+      "proxyCaveat": "ETF wrapper; expense drag and equity trading hours apply."
+    },
+    "HYG": {
+      "name": "iShares iBoxx High Yield Corporate Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "High Yield Credit",
+      "exchange": "NYSEARCA",
+      "description": "High yield corporate credit. Commonly watched as a risk appetite gauge.",
+      "proxyFor": "US high yield corporate bonds",
+      "proxyCaveat": "ETF wrapper; can trade at a meaningful premium or discount to NAV under stress."
+    },
+    "AGG": {
+      "name": "iShares Core U.S. Aggregate Bond ETF",
+      "type": "BOND_ETF",
+      "sector": "Fixed Income",
+      "industry": "Aggregate",
+      "exchange": "NYSEARCA",
+      "description": "Broad investment grade US bond market across Treasuries, agencies, and corporates.",
+      "proxyFor": "Bloomberg US Aggregate Bond Index",
+      "proxyCaveat": "ETF wrapper; expense drag and equity trading hours apply."
+    },
+
+    "GLD": {
+      "name": "SPDR Gold Shares",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Precious Metals",
+      "exchange": "NYSEARCA",
+      "description": "Holds physical gold bullion. The most direct listed gold proxy.",
+      "proxyFor": "Spot gold",
+      "proxyCaveat": "Tracks spot closely but bears an expense ratio and trades only during US equity hours."
+    },
+    "SLV": {
+      "name": "iShares Silver Trust",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Precious Metals",
+      "exchange": "NYSEARCA",
+      "description": "Holds physical silver. More volatile than gold given its industrial demand component.",
+      "proxyFor": "Spot silver",
+      "proxyCaveat": "Expense drag and equity trading hours apply."
+    },
+    "USO": {
+      "name": "United States Oil Fund LP",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Energy",
+      "exchange": "NYSEARCA",
+      "description": "Holds WTI crude futures rather than physical oil.",
+      "proxyFor": "WTI crude oil",
+      "proxyCaveat": "Futures-based: roll yield causes persistent divergence from spot, severe in contango. A poor long-horizon proxy."
+    },
+    "UNG": {
+      "name": "United States Natural Gas Fund LP",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Energy",
+      "exchange": "NYSEARCA",
+      "description": "Holds natural gas futures.",
+      "proxyFor": "Henry Hub natural gas",
+      "proxyCaveat": "Futures-based with historically severe roll decay. Reads very differently from spot gas over time."
+    },
+    "DBA": {
+      "name": "Invesco DB Agriculture Fund",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Agriculture",
+      "exchange": "NYSEARCA",
+      "description": "Basket of agricultural commodity futures.",
+      "proxyFor": "Agricultural commodities basket",
+      "proxyCaveat": "Futures-based and subject to roll effects."
+    },
+    "COPX": {
+      "name": "Global X Copper Miners ETF",
+      "type": "COMMODITY_ETF",
+      "sector": "Commodities",
+      "industry": "Industrial Metals",
+      "exchange": "NYSEARCA",
+      "description": "Copper mining equities, used here as an indirect copper proxy.",
+      "proxyFor": "Copper",
+      "proxyCaveat": "Equity proxy, not the metal: carries operational and equity-beta exposure the commodity does not."
+    },
+
+    "BTCUSDT": {
+      "name": "Bitcoin",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Store of Value",
+      "exchange": "BINANCE",
+      "description": "The largest cryptocurrency by market capitalisation.",
+      "stream": "btcusdt"
+    },
+    "ETHUSDT": {
+      "name": "Ethereum",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Smart Contract Platform",
+      "exchange": "BINANCE",
+      "description": "Programmable settlement layer supporting most decentralised applications.",
+      "stream": "ethusdt"
+    },
+    "SOLUSDT": {
+      "name": "Solana",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Smart Contract Platform",
+      "exchange": "BINANCE",
+      "description": "High-throughput smart contract chain.",
+      "stream": "solusdt"
+    },
+    "BNBUSDT": {
+      "name": "BNB",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Exchange Token",
+      "exchange": "BINANCE",
+      "description": "Native asset of the BNB Chain ecosystem.",
+      "stream": "bnbusdt"
+    },
+    "XRPUSDT": {
+      "name": "XRP",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Payments",
+      "exchange": "BINANCE",
+      "description": "Payment and settlement focused digital asset.",
+      "stream": "xrpusdt"
+    },
+    "ADAUSDT": {
+      "name": "Cardano",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Smart Contract Platform",
+      "exchange": "BINANCE",
+      "description": "Proof-of-stake smart contract platform.",
+      "stream": "adausdt"
+    },
+    "AVAXUSDT": {
+      "name": "Avalanche",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Smart Contract Platform",
+      "exchange": "BINANCE",
+      "description": "Smart contract platform built around configurable subnets.",
+      "stream": "avaxusdt"
+    },
+    "LINKUSDT": {
+      "name": "Chainlink",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Oracle",
+      "exchange": "BINANCE",
+      "description": "Decentralised oracle network supplying external data to smart contracts.",
+      "stream": "linkusdt"
+    },
+    "DOTUSDT": {
+      "name": "Polkadot",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Interoperability",
+      "exchange": "BINANCE",
+      "description": "Multi-chain protocol connecting independent parachains.",
+      "stream": "dotusdt"
+    },
+    "DOGEUSDT": {
+      "name": "Dogecoin",
+      "type": "CRYPTO",
+      "sector": "Crypto",
+      "industry": "Payments",
+      "exchange": "BINANCE",
+      "description": "Proof-of-work coin with a large retail following and sentiment-driven price behaviour.",
+      "stream": "dogeusdt"
+    }
+  }
+}

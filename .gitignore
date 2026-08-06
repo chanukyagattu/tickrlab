@@ -1,2 +1,8 @@
 .idea/
+node_modules/
+dist/
+*.tsbuildinfo
+vite.config.ts.timestamp-*.mjs
+.env
+.env.*
 
