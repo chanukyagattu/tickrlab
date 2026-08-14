@@ -16,7 +16,7 @@
 
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -114,7 +114,16 @@ function decode(text) {
     .trim();
 }
 
-/** Yahoo Finance per-symbol RSS. Keyless, but CORS-blocked in a browser. */
+/**
+ * Yahoo Finance per-symbol RSS. BEST EFFORT ONLY — do not rely on this.
+ *
+ * Measured 2026-08: returns HTTP 429 with a 19-byte "Too Many Requests" body
+ * on every request, including the first from a cold IP. That is a block, not a
+ * throttle, so there is nothing to back off from and retrying is pointless.
+ *
+ * Kept because it costs one request and may work from other addresses, but the
+ * pipeline's health does not depend on it: an empty return here is normal.
+ */
 async function fetchYahooNews(symbol) {
   const url = `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${symbol}&region=US&lang=en-US`;
   try {
@@ -134,12 +143,23 @@ async function fetchYahooNews(symbol) {
 }
 
 /**
- * SEC EDGAR full-text filing feed, filtered to the forms that actually move
- * prices: 8-K (material events), 10-Q, 10-K.
+ * SEC EDGAR filings, across the form types that actually move prices.
+ *
+ * PRIMARY SOURCE. Measured 2026-08: EDGAR returns clean Atom in ~390ms with a
+ * descriptive User-Agent, while Yahoo's RSS endpoint returns a flat HTTP 429.
+ * SEC is also the more defensible source — it is the issuer's own filing, not
+ * an aggregator's summary of it.
  */
 async function fetchSecFilings() {
+  const forms = ['8-K', '10-Q', '10-K'];
+  const results = await pool(forms, 1, (form) => fetchSecForm(form));
+  return results.flat();
+}
+
+async function fetchSecForm(formType) {
   const url =
-    'https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&dateb=&owner=include&count=100&output=atom';
+    `https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=${encodeURIComponent(formType)}` +
+    '&dateb=&owner=include&count=60&output=atom';
   try {
     const xml = await get(url, { 'User-Agent': SEC_USER_AGENT, Accept: 'application/atom+xml' });
     return parseFeed(xml).map((item) => {
@@ -152,11 +172,11 @@ async function fetchSecFilings() {
         url: item.link,
         datetime: item.time,
         symbols: [],
-        formType: formMatch ? formMatch[1] : '8-K',
+        formType: formMatch ? formMatch[1] : formType,
       };
     });
   } catch (error) {
-    console.warn(`  ! sec edgar: ${error.message}`);
+    console.warn(`  ! sec edgar ${formType}: ${error.message}`);
     return [];
   }
 }
@@ -190,14 +210,19 @@ async function main() {
   deduped.sort((a, b) => b.datetime - a.datetime);
   const items = deduped.slice(0, MAX_ITEMS);
 
-  console.log(
-    `\n${items.length} items ` +
-      `(yahoo: ${items.filter((i) => i.source === 'YAHOO').length}, ` +
-      `sec: ${items.filter((i) => i.source === 'SEC').length})`,
-  );
+  const secCount = items.filter((i) => i.source === 'SEC').length;
+  const yahooCount = items.filter((i) => i.source === 'YAHOO').length;
+  console.log(`\n${items.length} items (sec: ${secCount}, yahoo: ${yahooCount})`);
 
-  if (!items.length) {
-    console.error('refusing to publish an empty news payload');
+  // SEC is the primary source; Yahoo is best effort. Failing the job only when
+  // SEC is also empty means a Yahoo block — the normal case — does not turn
+  // the pipeline red for something that was never load-bearing.
+  if (!secCount) {
+    console.error(
+      'refusing to publish: SEC EDGAR returned nothing. Check the User-Agent ' +
+        '(SEC requires contact details and returns 403 without them), or whether ' +
+        'this IP range is blocked.',
+    );
     process.exit(1);
   }
 
@@ -210,7 +235,15 @@ async function main() {
 }
 
 // Only run when invoked directly, so the parser can be imported by tests.
-if (import.meta.url === `file://${process.argv[1]}`) {
+//
+// `pathToFileURL` is required, not cosmetic. The naive comparison
+//     import.meta.url === `file://${process.argv[1]}`
+// fails on any path containing a space or a non-ASCII character, because
+// import.meta.url is percent-encoded and argv[1] is not. On a checkout under
+// "Documents - Chanukya’s MacBook Pro" the two never match, so main() silently
+// never ran and the script exited 0 having done nothing — which is a far worse
+// failure than a crash, because CI reports it as success.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);

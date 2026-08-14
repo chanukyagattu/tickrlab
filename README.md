@@ -55,11 +55,20 @@ Both are covered properly in [DESIGN.md](DESIGN.md).
 | Copilot — classifier + context | ✅ tested, incl. jailbreak cases |
 | Copilot — live inference | ⬜ needs a Cloudflare Worker deploy |
 
-**No API key is needed to run this.** Both price providers (Stooq primary,
-Yahoo fallback) and both news sources (Yahoo RSS, SEC EDGAR) are keyless, so
-`npm run fetch:prices` works on a fresh clone with nothing configured.
+**Prices need a free [Tiingo](https://tiingo.com) key** (`TIINGO_TOKEN`, in repo
+secrets for CI or your shell locally). **News needs nothing** — SEC EDGAR is
+keyless and works out of the box.
 
-### Two things the tests caught
+It was built keyless first, on Stooq and Yahoo. Both turned out to be unusable:
+Stooq now serves a JavaScript challenge to every request regardless of
+User-Agent, and Yahoo returns 429 from a cold IP. `npm run diagnose` is the
+script written to establish that, after two rounds of guessing at it.
+
+Switching to a keyed provider made the architecture more coherent, not less —
+the whole "Actions as backend" argument is about key custody, and with keyless
+sources that argument was decorative.
+
+### Three things that were caught by measuring, not assuming
 
 Worth recording, because both were silent failures that looked like results:
 
@@ -75,6 +84,14 @@ as mean-reversion while EMA spread is trend-following and the two partly cancel.
 The backtest ran zero trades and reported a 0% hit rate as though that were a
 finding. Threshold is now 25, sitting near the 90th percentile of the real
 distribution.
+
+**A script exited 0 having done nothing.** The `main()` guard compared
+``import.meta.url`` against `` `file://${process.argv[1]}` ``, which never
+matches on a path containing a space or a non-ASCII character, because one side
+is percent-encoded and the other is not. On a checkout under
+`Documents - Chanukya's MacBook Pro` the news fetcher silently did nothing and
+returned success — worse than crashing, since CI reports it green. Fixed with
+`pathToFileURL`.
 
 ## Stack
 

@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fetch:prices": "node scripts/fetch-prices.mjs --out dist-data",
-    "fetch:news": "node scripts/fetch-news.mjs --out dist-data"
+    "fetch:news": "node scripts/fetch-news.mjs --out dist-data",
+    "diagnose": "node scripts/diagnose.mjs"
   },
   "dependencies": {
     "lightweight-charts": "^4.2.0",

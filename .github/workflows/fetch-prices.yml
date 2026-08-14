@@ -2,20 +2,25 @@
 #
 # The API key lives in repository secrets and never reaches the browser.
 # Visitors read a static JSON file, so 10,000 concurrent users cost exactly
-# the same number of upstream API calls as one: zero.
+# the same number of upstream API calls as one: zero. That key custody is the
+# reason this job exists in CI rather than in the client.
 #
-# Output is force-pushed as a SINGLE commit to an orphan `data` branch.
-# A 30-minute cron that commits normally produces ~17,000 commits a year
-# and a repo nobody can clone. Rebuilding the branch from scratch each run
-# keeps it permanently at one commit.
+# INCREMENTAL: Tiingo's free tier allows 50 requests/hour against a 55-symbol
+# universe, so each run refreshes the stalest ~40 and merges over what is
+# already published. Coverage converges within two runs. The job therefore
+# pulls the current data branch first — without it every run would bootstrap
+# from empty and never exceed 40 symbols.
+#
+# MANUAL ONLY until this has been run successfully at least once. Arming a
+# schedule before the thing it schedules is known to work just fills the
+# Actions history with red until you stop reading it.
 
 name: Fetch prices
 
 on:
-  schedule:
-    # 21:40 UTC on weekdays — after the US close (20:00/21:00 UTC depending
-    # on daylight saving), with margin for the provider settling EOD bars.
-    - cron: '40 21 * * 1-5'
+  # schedule:
+  #   # 21:40 UTC weekdays — after the US close, with margin for EOD settling.
+  #   - cron: '40 21 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -31,21 +36,34 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Fetch OHLCV for the universe
-        env:
-          PROVIDER_KEY: ${{ secrets.PROVIDER_KEY }}
-        run: node scripts/fetch-prices.mjs --out dist-data
+      # Pull whatever is already published so the fetcher can merge rather
+      # than replace. Missing on the first run, which is expected and handled.
+      - name: Fetch existing payload
+        run: |
+          set -euo pipefail
+          mkdir -p existing
+          if git ls-remote --exit-code --heads origin data >/dev/null 2>&1; then
+            git fetch origin data --depth 1
+            git show origin/data:prices.json > existing/prices.json 2>/dev/null \
+              || echo 'no prices.json on the data branch yet'
+          else
+            echo 'data branch does not exist yet — bootstrapping'
+          fi
 
-      # A provider returning 200 with an empty body is the common failure
-      # here, and it is worse than an error: it would publish an empty
-      # dashboard over good data. Refuse to publish anything we cannot
-      # sanity check.
+      - name: Fetch prices
+        env:
+          TIINGO_TOKEN: ${{ secrets.TIINGO_TOKEN }}
+        run: node scripts/fetch-prices.mjs --out dist-data --existing existing/prices.json
+
+      # A provider answering 200 with an empty body is the dangerous failure —
+      # worse than an error, because it would publish a blank dashboard over
+      # good data. Refuse to publish anything that fails a sanity check.
       - name: Validate output before publishing
         run: |
           set -euo pipefail
@@ -54,22 +72,41 @@ jobs:
           node -e '
             const d = require("./dist-data/prices.json");
             const n = Object.keys(d.assets ?? {}).length;
-            if (n < 40) { console.error(`only ${n} assets; refusing`); process.exit(1); }
+            if (n < 30) { console.error(`only ${n} assets; refusing`); process.exit(1); }
             for (const [sym, a] of Object.entries(d.assets)) {
               if (!Array.isArray(a.candles) || a.candles.length < 60) {
                 console.error(`${sym}: ${a.candles?.length ?? 0} candles, need 60+`);
                 process.exit(1);
               }
+              const t = a.candles.map(c => c.time);
+              for (let i = 1; i < t.length; i++) {
+                if (t[i] <= t[i-1]) { console.error(`${sym}: candles not ascending`); process.exit(1); }
+              }
             }
             console.log(`ok: ${n} assets`);
           '
 
+      # Rebuilt from scratch each run, so the data branch stays exactly one
+      # commit deep. A daily cron that commits normally would otherwise
+      # produce a repo nobody can clone.
+      #
+      # This job and fetch-news share the branch, so each must overlay ONLY the
+      # file it owns. Publishing dist-data/ directly would silently delete
+      # news.json — the two jobs would take turns wiping each other out, and
+      # the dashboard would show whichever half ran most recently.
       - name: Publish to data branch
         run: |
           set -euo pipefail
-          cd dist-data
 
-          # Fresh repo => exactly one commit, every time.
+          rm -rf publish && mkdir publish
+          git clone -q --depth 1 --branch data \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            publish 2>/dev/null || echo 'data branch does not exist yet'
+
+          rm -rf publish/.git
+          cp dist-data/prices.json publish/prices.json
+
+          cd publish
           git init -q
           git checkout -qb data
           git config user.name  'tickrlab-bot'
@@ -79,3 +116,5 @@ jobs:
           git push -q --force \
             "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
             data
+
+          echo "published: $(ls -1)"

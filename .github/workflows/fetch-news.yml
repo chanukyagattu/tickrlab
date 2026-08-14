@@ -11,9 +11,18 @@
 
 name: Fetch news
 
+# MANUAL ONLY until this has been run successfully at least once.
+#
+# The cron was enabled before scripts/fetch-news.mjs existed on the remote, so
+# it failed every 30 minutes and filled the Actions history with red. A
+# scheduled job should not be armed until the thing it schedules is known to
+# work — otherwise the first signal you get from it is noise, and you stop
+# reading it.
+#
+# To re-enable once a manual run is green, uncomment the schedule block.
 on:
-  schedule:
-    - cron: '*/30 * * * *'
+  # schedule:
+  #   - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:

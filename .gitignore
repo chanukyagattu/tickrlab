@@ -1,6 +1,11 @@
 .idea/
 node_modules/
 dist/
+
+# Fetch output. Belongs on the orphan `data` branch, published by CI — never
+# on main. It is ~2.4 MB per run and would bloat the repo within days.
+dist-data/
+
 *.tsbuildinfo
 vite.config.ts.timestamp-*.mjs
 .env

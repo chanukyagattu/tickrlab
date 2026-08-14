@@ -88,17 +88,63 @@ Two data paths, chosen by how fast the asset actually moves:
 | Batch | Equities, ETFs, bond & commodity proxies | Static JSON from CI | End of day |
 | Batch | News, SEC filings | Static JSON from CI | ~30–45 min |
 
-**Every source is keyless.** Prices come from Stooq (primary) with Yahoo Finance as
-fallback; news from Yahoo RSS and SEC EDGAR. There is no provider account, no repo
-secret, and no quota — `npm run fetch:prices` runs on a fresh clone with nothing
-configured. That was a deliberate constraint: a pipeline that requires a signup is one
-a reviewer will not run.
+### Choosing a price provider, and getting it wrong first
 
-The tradeoff is that neither price source is an official, supported API. Stooq answers
-a bad symbol with HTTP 200 and the body `No data`; Yahoo's chart endpoint is
-undocumented and returns 403 without a browser User-Agent. Both failure modes are
-handled explicitly and tested, and the payload records which provider served each
-symbol so a silent drift from primary to fallback is visible rather than invisible.
+The first version used **Stooq** (primary) and **Yahoo Finance** (fallback) on the
+reasoning that a pipeline requiring a signup is one a reviewer will not run. Both
+turned out to be unusable for programmatic access. Measured, via
+`scripts/diagnose.mjs`:
+
+| Source | Variant | Result |
+|---|---|---|
+| Stooq | bot User-Agent | HTTP 200, 796 bytes of HTML |
+| Stooq | browser User-Agent | HTTP 200, same HTML |
+| Stooq | no User-Agent | HTTP 200, same HTML |
+| Stooq | stooq.pl host | HTTP 200, same HTML |
+| Yahoo | chart endpoint | HTTP 429 |
+| Yahoo | news RSS | HTTP 429, 19-byte body |
+| **SEC EDGAR** | atom feed | **HTTP 200, valid Atom** |
+
+The Stooq body contains `<noscript>` — it is a JavaScript challenge, identical under
+every User-Agent, so no header fixes it. Yahoo returns 429 on a cold IP, which is a
+block rather than a throttle: there is nothing to back off from.
+
+The diagnostic exists because two rounds were spent guessing at plausible causes
+(rate limiting, User-Agent filtering, datacenter IP blocking) before anyone measured
+which was true. It probes each endpoint under several variants and prints the status
+and first bytes of every response.
+
+**Prices now come from Tiingo**, which requires a free key. That is a real cost — a
+reviewer has to sign up to run the fetch — but it makes the architecture *more*
+coherent rather than less. The entire "Actions as backend" argument is about key
+custody, and with keyless sources that argument was decorative. With a keyed provider
+the CI placement is load-bearing: the token lives in repository secrets, never in the
+bundle, and visitors read a static file.
+
+**News still comes from SEC EDGAR**, which works and needs no key. Yahoo RSS is
+retained as best-effort only; the job fails only if SEC returns nothing, so a Yahoo
+block does not turn the pipeline red for a source that was never load-bearing.
+
+### Incremental fetching
+
+Tiingo's free tier allows **50 requests/hour** against a 55-symbol universe, so a
+naive full run hits the cap every time and publishes a partial payload.
+
+Each run therefore loads the currently published payload, sorts the universe by
+staleness, refreshes at most 40 symbols, and merges over what exists. Coverage
+converges within two runs and stays fresh after that. A partial failure degrades to
+"some symbols are a day older" rather than "the dashboard lost half its assets", and
+the job refuses to publish a payload thinner than the one already live.
+
+### Adjusted prices
+
+Tiingo returns both raw and split/dividend-adjusted fields, and the adapter uses the
+adjusted ones. This is not a detail. Raw prices put a fake discontinuity in the series
+at every corporate action — NVDA's 10-for-1 split in June 2024 appears as a ~90%
+single-session crash in unadjusted data, which drives RSI to 0, inverts the EMA
+spread, and manufactures a maximum-conviction signal out of an accounting event.
+Volume is adjusted for the same reason, or the volume component sees a 10x spike on
+the same day for the same non-reason.
 
 The UI renders `generatedAt` from the payload rather than claiming "live". Labelling
 end-of-day data as real-time would be the easiest lie in the project and the one most
