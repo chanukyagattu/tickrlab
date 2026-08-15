@@ -48,7 +48,7 @@ Both are covered properly in [DESIGN.md](DESIGN.md).
 |---|---|
 | Design doc + wireframes | ✅ |
 | CI data pipeline + keepalive | ✅ keyless — no API account required |
-| Scoring engine + tests | ✅ 145 tests |
+| Scoring engine + tests | ✅ 139 tests |
 | Backtester (Web Worker) | ✅ |
 | Dashboard UI | ✅ |
 | Crypto WebSocket | ✅ |
@@ -123,7 +123,7 @@ The UI renders `generatedAt` from the payload rather than claiming "live".
 npm install
 npm run dev
 
-npm test              # 145 tests: indicators, scoring, backtest, parsers, intent
+npm test              # 139 tests: indicators, scoring, backtest, parsers, intent
 npm run typecheck
 npm run build
 
